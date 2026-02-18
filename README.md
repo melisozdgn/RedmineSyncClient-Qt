@@ -3,8 +3,8 @@
 This is my internship project developed with C++ and the Qt Framework. The main goal was to build a desktop client for Redmine that follows an **"Offline-First"** approach, allowing users to keep working even without an active internet connection.
 
 ##  What I Built
-
-* **Offline Access ** I used `QJsonDocument` to create a local storage system. When the app starts, it loads everything from a local `tasks.json` file first, so the interface is ready immediately without waiting for a server response.
+ 
+** Offline Access ** I used `QJsonDocument` to create a local storage system. When the app starts, it loads everything from a local `tasks.json` file first, so the interface is ready immediately without waiting for a server response.
 * **Smart Sync Logic:** I implemented the communication with Redmine's REST API using `QNetworkAccessManager`. When you click "Synchronize", the app handles the complex task of pulling new updates and pushing local changes back to the server.
 * **Conflict Resolution:**  I designed a `ConflictDialog` that detects if a task was modified both locally and on the server. It shows both versions side-by-side so the user can decide which data to keep.
 * **Gantt Chart & Progress Tracking:** To make the data more visual, I added a custom **Gantt Chart** for timelines and integrated **Progress Bars** into the list view to track task completion at a glance.
