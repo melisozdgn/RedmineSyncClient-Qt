@@ -1,0 +1,9 @@
+# Qt derleme klasörlerini engelle
+build/
+debug/
+release/
+*.user
+
+# Gereksiz sistem dosyaları
+.DS_Store
+Thumbs.db
