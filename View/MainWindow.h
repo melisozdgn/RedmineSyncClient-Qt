@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
@@ -36,4 +37,5 @@ private:
     int currentRow;
     void updateDetailView(const Task& t);
 };
+
 #endif

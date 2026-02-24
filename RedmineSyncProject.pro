@@ -40,6 +40,7 @@ FORMS += \
 
 DISTFILES += \
     .gitignore \
+    config.example.json \
     config.json
 
 INCLUDEPATH += . Controller Model Service View Utils

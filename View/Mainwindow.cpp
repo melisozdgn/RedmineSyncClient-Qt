@@ -1,30 +1,40 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "../Utils/ProgressBar.h"
 #include "ConflictDialog.h"
 #include "DescriptionDialog.h"
+#include "ProgressBar.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), currentRow(-1)
 {
     ui->setupUi(this);
+
     QString style = "QTableView::item:selected { background-color: #F0F8FF; color: black; }"
                     "QTableView::item:hover { background-color: #F0F8FF; color: black; }";
     ui->tableView->setStyleSheet(style);
     ui->detailView->setStyleSheet(style);
+
     controller = new TaskController(this);
+
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(controller->getModel());
     proxyModel->setFilterKeyColumn(-1);
+    proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
     ui->tableView->setModel(proxyModel);
     ui->tableView->setItemDelegate(new ProgressBar(ui->tableView));
+
     detailModel = new QStandardItemModel(this);
     detailModel->setHorizontalHeaderLabels({"Property", "Value"});
     ui->detailView->setModel(detailModel);
     ui->detailView->horizontalHeader()->setStretchLastSection(true);
     ui->detailView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
     ganttView = new GanttView(this);
     ui->ganttLayout->addWidget(ganttView);
+
+    ui->statusLabel->clear();
+
     connect(ui->btnSync, &QPushButton::clicked, this, &MainWindow::onSyncClicked);
     connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::onSaveClicked);
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &MainWindow::onFilterChanged);
@@ -33,8 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->detailView, &QTableView::doubleClicked, this, &MainWindow::onDetailDoubleClicked);
     connect(controller, &TaskController::dataUpdated, this, &MainWindow::updateGantt);
     connect(controller, &TaskController::conflictFound, this, &MainWindow::onConflictDetected);
+
     controller->init();
 }
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -67,6 +79,7 @@ void MainWindow::onTableDoubleClicked(const QModelIndex &index)
         updateDetailView(t);
     }
 }
+
 void MainWindow::onDetailDoubleClicked(const QModelIndex &index)
 {
     if(currentRow < 0) return;
@@ -85,7 +98,22 @@ void MainWindow::onDetailDoubleClicked(const QModelIndex &index)
 void MainWindow::onFilterChanged(const QString &text)
 {
     proxyModel->setFilterFixedString(text);
+
+    if (text.isEmpty()) {
+        ui->statusLabel->clear();
+    } else {
+        int resultCount = proxyModel->rowCount();
+
+        if (resultCount == 0) {
+            ui->statusLabel->setText("No results found!");
+            ui->statusLabel->setStyleSheet("color: red; font-weight: bold;");
+        } else {
+            ui->statusLabel->setText(QString("%1 records found.").arg(resultCount));
+            ui->statusLabel->setStyleSheet("color: green; font-weight: bold;");
+        }
+    }
 }
+
 void MainWindow::updateDetailView(const Task& t)
 {
     detailModel->removeRows(0, detailModel->rowCount());
@@ -110,6 +138,7 @@ void MainWindow::updateGantt()
 {
     ganttView->updateTasks(controller->getTasks());
 }
+
 void MainWindow::onConflictDetected(int row, Task serverTask)
 {
     Task localTask = controller->getTask(row);
